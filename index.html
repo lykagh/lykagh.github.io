@@ -9,16 +9,19 @@
     --ink:#000;
     --paper:#fff;
     --grey:#8c8c8c;
-    --hair:#d8d8d8;
+    --grey-inv:#9a9a9a;
+    --hair-inv:#3a3a3a;
     --pad:clamp(20px,5vw,64px);
+    --maxw:1240px;
     --sans:"Helvetica Neue",Helvetica,Arial,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
   }
   *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
   html{-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
   body{
     background:var(--paper);color:var(--ink);
     font-family:var(--sans);font-size:15px;line-height:1.7;
-    overflow-x:hidden;
+    overflow:hidden;
   }
   body::before{
     content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
@@ -29,106 +32,118 @@
     mask-image:linear-gradient(to bottom,#000 0%,transparent 90%);
     -webkit-mask-image:linear-gradient(to bottom,#000 0%,transparent 90%);
   }
-  .wrap{position:relative;z-index:1;max-width:1240px;margin:0 auto;padding:0 var(--pad)}
+
+  /* 一屏两段：白底（页眉 + 第 1、2 行） / 通栏黑底（第 3、4 行 + 页脚，铺到屏幕底边）
+     高度锁死，不产生滚动 */
+  .page{
+    position:relative;z-index:1;
+    height:100vh;height:100dvh;
+    max-width:var(--maxw);margin:0 auto;
+    padding:0 var(--pad);
+    display:grid;
+    grid-template-rows:auto 1fr;
+    gap:clamp(14px,3vh,40px);
+  }
 
   header{
-    display:flex;justify-content:space-between;align-items:baseline;
-    padding:22px 0;border-bottom:1px solid var(--ink);
+    display:flex;flex-wrap:wrap;gap:8px 40px;
+    justify-content:space-between;align-items:baseline;
+    padding:20px 0;border-bottom:1px solid var(--ink);
     font-size:11px;letter-spacing:.22em;text-transform:uppercase;
   }
   header span:last-child{color:var(--grey)}
 
-  .hero{
-    min-height:74vh;display:flex;flex-direction:column;justify-content:space-between;
-    padding:clamp(36px,8vh,96px) 0 28px;
+  main{
+    min-height:0;
+    display:flex;flex-direction:column;
+    align-items:flex-start;
   }
-  h1{font-size:clamp(46px,11.5vw,164px);line-height:.96;letter-spacing:-.035em;font-weight:800}
-  h1 .thin{
-    display:block;font-weight:200;color:var(--grey);
-    font-size:.26em;letter-spacing:.06em;line-height:1.9;margin-top:.5em;
-  }
-  .hero-meta{
-    display:flex;flex-wrap:wrap;gap:8px 40px;justify-content:space-between;
-    border-top:1px solid var(--ink);padding-top:14px;margin-top:clamp(28px,6vh,64px);
-    font-size:11px;letter-spacing:.18em;color:var(--grey);
-  }
-  .hero-meta b{color:var(--ink);font-weight:600}
+  /* 第 1、2 行：在白底区域里居中，黑带因此被顶到最底部 */
+  .top{margin:auto 0}
 
-  .statement{background:var(--ink);color:var(--paper);padding:clamp(48px,9vw,110px) var(--pad)}
-  .statement p{
-    max-width:1240px;margin:0 auto;
-    font-size:clamp(20px,3.2vw,44px);line-height:1.5;
-    font-weight:400;letter-spacing:-.01em;
+  /* 第 1 行 */
+  .l1{
+    font-size:clamp(34px,min(14vw,15.5vh),170px);
+    line-height:.96;letter-spacing:-.035em;font-weight:800;
   }
-  .statement p em{font-style:normal;font-weight:200;color:#9a9a9a}
-
-  .blocks{padding:clamp(40px,7vw,90px) 0}
-  .block{
-    display:grid;grid-template-columns:110px 1fr;gap:clamp(12px,3vw,48px);align-items:baseline;
-    padding:clamp(22px,3.2vw,38px) 0;border-top:1px solid var(--ink);
-  }
-  .block:last-child{border-bottom:1px solid var(--ink)}
-  .num{
-    font-size:clamp(24px,2.6vw,38px);font-weight:800;line-height:1;
-    letter-spacing:-.04em;color:var(--grey);
-  }
-  .block p{
-    font-size:clamp(22px,3.4vw,44px);font-weight:700;
-    line-height:1.3;letter-spacing:-.02em;
-  }
-  .block p.soft{font-weight:300;color:#444}
-
-  footer{background:var(--ink);color:var(--paper);padding:clamp(56px,9vw,110px) var(--pad)}
-  footer .inner{max-width:1240px;margin:0 auto}
-  .footer-big{
-    font-size:clamp(30px,6.6vw,92px);font-weight:800;line-height:1.1;
-    letter-spacing:-.045em;margin-bottom:clamp(32px,5vw,60px);
-  }
-  .footer-row{
-    display:flex;flex-wrap:wrap;gap:12px 40px;justify-content:space-between;
-    border-top:1px solid #3a3a3a;padding-top:18px;
-    font-size:11px;letter-spacing:.18em;color:#8c8c8c;
+  /* 第 2 行 */
+  .l2{
+    font-size:clamp(13px,min(3vw,3vh),34px);
+    font-weight:200;color:var(--grey);
+    letter-spacing:.08em;line-height:1.6;
+    margin-top:clamp(8px,1.8vh,24px);
   }
 
-  @media (max-width:760px){
-    .block{grid-template-columns:1fr;gap:8px}
+  /* 第 3 行往后的全部内容：通栏黑底，一直铺到视口底边，文字仍与上方标题左对齐 */
+  .statement{
+    width:100vw;
+    margin-left:calc(50% - 50vw);
+    background:var(--ink);color:var(--paper);
+    padding:clamp(22px,4.4vh,56px) var(--pad) clamp(20px,3.6vh,48px);
+  }
+  .statement-inner{max-width:var(--maxw);margin:0 auto}
+  /* 第 3 行 */
+  .l3{
+    font-size:clamp(20px,min(5.4vw,6.4vh),64px);
+    font-weight:700;line-height:1.25;letter-spacing:-.02em;
+  }
+  /* 第 4 行 */
+  .l4{
+    font-size:clamp(18px,min(4.8vw,5.6vh),56px);
+    font-weight:200;color:var(--grey-inv);
+    line-height:1.25;letter-spacing:-.01em;
+    margin-top:clamp(6px,1.4vh,18px);
+  }
+  /* 第 4 行之后的页脚信息，同样在黑底上 */
+  .statement-foot{
+    display:flex;flex-wrap:wrap;gap:8px 40px;
+    justify-content:space-between;align-items:baseline;
+    border-top:1px solid var(--hair-inv);
+    margin-top:clamp(22px,5vh,64px);
+    padding-top:clamp(14px,2.4vh,24px);
+    font-size:11px;letter-spacing:.22em;text-transform:uppercase;
+    color:var(--grey);
+  }
+
+  .l1,.l2,.statement{animation:rise .8s cubic-bezier(.22,1,.36,1) both}
+  .l2{animation-delay:.08s}
+  .statement{animation-delay:.16s}
+  @keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+
+  @media (prefers-reduced-motion:reduce){
+    .l1,.l2,.statement{animation:none}
   }
 </style>
 </head>
 <body>
 
-<div class="wrap">
+<div class="page">
+
   <header>
     <span>老杨</span>
     <span>tiantian.cn</span>
   </header>
 
-  <section class="hero">
-    <h1>
-      我，老杨啊
-      <span class="thin">文化浅 · 年纪大 · 觉悟低</span>
-    </h1>
-    <div class="hero-meta">
-      <span>个人主页 · <b>tiantian.cn</b></span>
-      <span>2004 - 2026</span>
-      <span>版权所冇</span>
+  <main>
+    <div class="top">
+      <h1 class="l1">我，老杨啊</h1>
+      <p class="l2">文化浅 · 年纪大 · 觉悟低</p>
     </div>
-  </section>
+
+    <div class="statement">
+      <div class="statement-inner">
+        <p class="l3">发财，这一世应该是不可能的了。</p>
+        <p class="l4">下世？希望不要有下世了。</p>
+
+        <div class="statement-foot">
+          <span>tiantian.cn</span>
+          <span>2004 - 2026</span>
+        </div>
+      </div>
+    </div>
+  </main>
+
 </div>
-
-<section class="statement">
-  <p>发财，这一世应该是不可能的了。<br><em>下世？希望不要有下世了。</em></p>
-</section>
-
-
-<footer>
-  <div class="inner">
-    <div class="footer-row">
-      <span>tiantian.cn</span>
-      <span>2004 - 2026</span>
-    </div>
-  </div>
-</footer>
 
 </body>
 </html>
